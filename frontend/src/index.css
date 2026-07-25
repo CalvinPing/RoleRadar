@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #0c1116;
+  --color-panel: #131a22;
+  --color-panel-raised: #182029;
+  --color-line: #232e39;
+  --color-ink: #e8edf2;
+  --color-ink-dim: #8b99a8;
+  --color-ink-faint: #576674;
+  --color-amber: #ffb454;
+  --color-cyan: #5eead4;
+  --color-danger: #f0806a;
+
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-sans: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-void);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-amber);
+    color: var(--color-void);
+  }
+
+  * {
+    scrollbar-color: var(--color-line) transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.live-pulse {
+  animation: pulse-dot 2s ease-in-out infinite;
+}

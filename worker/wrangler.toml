@@ -1,0 +1,33 @@
+name = "roleradar-worker"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# We have 150+ sources (companies + aggregators) split across TOTAL_SLOTS
+# (NUM_COMPANY_SHARDS + 2 dedicated aggregator slots, see lib/cache.ts) -
+# two separate Workers Free limits forced this: 50 outbound fetch()
+# subrequests per invocation, AND a much tighter 10ms CPU-time-per-invocation
+# limit that we actually hit in production (error 1102 "exceeded resources").
+# Two things caused it, both fixed: the aggregators' pagination/parsing was
+# bundled onto a company shard (now isolated), and COMPANIES is ordered by
+# when each was added, which happened to cluster several of the
+# highest-volume companies (Databricks, Stripe, DoorDash, MongoDB) into one
+# contiguous chunk (now round-robin distributed instead). The cron fires
+# every REFRESH_INTERVAL_MINUTES/TOTAL_SLOTS minutes, and a full cycle
+# across every source completes once per REFRESH_INTERVAL_MINUTES. With 20
+# slots and a 20-minute cycle, that's every 1 minute (the finest cron
+# granularity Cloudflare allows). If you change REFRESH_INTERVAL_MINUTES or
+# the shard count in lib/cache.ts, update this cron expression to match
+# (interval / total slots).
+[triggers]
+crons = ["*/1 * * * *"]
+
+[vars]
+REFRESH_INTERVAL_MINUTES = "32"
+
+# wrangler dev still simulates this locally regardless of the id below, so
+# local dev is unaffected by these being "real" ids.
+[[kv_namespaces]]
+binding = "JOBS_KV"
+id = "136e0367169e4de3b794eb41ca4b20ea"
+preview_id = "22fde961c878410f9fc3395ebefa6c32"
