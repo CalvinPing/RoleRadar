@@ -268,6 +268,26 @@ npm run build
 npx wrangler pages deploy dist
 ```
 
+**Securing the manual refresh trigger (optional but recommended):**
+`POST /api/refresh` has no auth by default, which means anyone who finds it
+could spam it — burning into Workers KV's 1,000-writes/day free-tier quota.
+This only gates the *manual* HTTP trigger; the real Cron Trigger calls
+`scheduled()` directly (a separate code path), so setting this has zero
+effect on the automatic refresh or on `GET /api/jobs` (the site itself).
+
+```bash
+cd worker
+npx wrangler secret put CRON_SECRET
+# paste a random value when prompted - save it somewhere, it won't be shown again
+```
+
+Once set, manual triggers need the header:
+
+```bash
+curl -X POST https://roleradar-worker.<your-subdomain>.workers.dev/api/refresh \
+  -H "Authorization: Bearer <your-secret>"
+```
+
 ## Sources considered and skipped
 
 Researched but not integrated, with the reason:
